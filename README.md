@@ -1,2 +1,6 @@
-# todo-api-spec
-OpenAPI specification for a To Do system.
+# To Do OpenAPI Specification
+
+OpenAPI specification for the fictional To Do system shown in the diagram below.
+
+![Architecture](images/todo.png)
+
