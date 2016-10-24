@@ -9,10 +9,8 @@ tags:
     description: Retrieve and manage tasks
   - name: users
     description: Retrieve and manage users
-  - name: authentication
-    description: Obtain authentication tokens
-  - name: activities
-    description: Retrieve an activity stream
+  - name: notifications
+    description: Register for notifications
 parameters:
   taskIdParam:
     name: taskId
@@ -166,6 +164,54 @@ paths:
           schema:
             $ref: '#/definitions/Error'
   
+  /tasks/{taskId}/attachments:
+    get:
+      tags:
+        - tasks
+      summary: Retrieve attachments
+      description: Returns a list of attachments for a task
+      operationId: retrieveAttachments
+      produces:
+        - application/json
+      parameters: 
+        - $ref: '#/parameters/taskIdParam'
+      responses:
+        '200':
+          description: Successful response
+          schema:
+            $ref: '#/definitions/AttachmentList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+    post:
+      tags:
+        - tasks
+      summary: Add attachment
+      description: Adds a new attachment to the task
+      operationId: addAttachment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - $ref: '#/parameters/taskIdParam'
+        - in: body
+          name: attachmentBody
+          description: The attachment details
+          required: true
+          schema:
+            $ref: '#/definitions/Attachment'
+      responses:
+        '201':
+          description: Successful response
+          schema:
+            $ref: '#/definitions/Attachment'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+            
   /users:
     get:
       tags:
@@ -218,23 +264,29 @@ paths:
           schema:
             $ref: '#/definitions/Error'
             
-  /activities:
-    get:
+  /notifications:
+    post:
       tags:
-        - activities
-      summary: Retrieve activities
-      description: Returns a list of activities for the current user
-      operationId: retrieveActivities
+        - notifications
+      summary: Register webhook
+      description: Registers a webhook callback with the system
+      operationId: registerNotification
+      consumes:
+        - application/json
       produces:
         - application/json
-      parameters: 
-        - $ref: '#/parameters/skipCountParam'
-        - $ref: '#/parameters/pageSizeParam'
+      parameters:
+        - in: body
+          name: notificationBody
+          description: The webhook details
+          required: true
+          schema:
+            $ref: '#/definitions/Notification'
       responses:
-        '200':
+        '201':
           description: Successful response
           schema:
-            $ref: '#/definitions/ActivityList'
+            $ref: '#/definitions/Notification'
         default:
           description: Unexpected error
           schema:
@@ -379,7 +431,7 @@ definitions:
         description: The password for the user
     description: A user
   
-  ActivityList:
+  AttachmentList:
     type: object
     required:
       - pagination
@@ -390,30 +442,36 @@ definitions:
       data:
         type: array
         items:
-          $ref: '#/definitions/Activity'
-    description: List of tasks
+          $ref: '#/definitions/Attachment'
+    description: List of attachments
   
-  Activity:
+  Attachment:
     type: object
+    description: Represents a task attachment
     required:
       - id
-      - taskId
-      - type
+      - url
     properties:
       id:
         type: string
-        description: Unique identifier for the activity
+        description: Unique identifier for the attachment
         readOnly: true
-      initiatorId:
+      url:
         type: string
-        description: Identifer of the user that triggered the activity
-      taskId:
+        description: URL of the attachment
+        
+  Notification:
+    type: object
+    description: Represents a notification
+    required:
+      - id
+      - url
+    properties:
+      id:
         type: string
-        description: Identifier of the task the activity was for
-      type:
+        description: Unique identifier for the notification
+        readOnly: true
+      url:
         type: string
-        description: The activity type
-      data:
-        type: object
-        description: The data specific to the activity
-    description: Represents something that happened in the system
+        description: URL of the webhook
+        
